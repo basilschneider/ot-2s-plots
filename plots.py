@@ -18,13 +18,23 @@ class plots(object):
         self._canvas = TCanvas()
         makedirs(outputfolder)
 
-    def getPlots(self):
+    def getAllPlots(self):
 
         """ Get all the plots. """
 
-        self._loopKeys()
+        for kname in self._getKeys():
 
-    def _loopKeys(self, subdir=None):
+            # Clear all objects from canvas
+            self._canvas.Clear()
+
+            # Get histogram and draw it
+            histo = self._rootfile.Get(kname)
+            histo.Draw()
+
+            # Save it as pdf
+            self._save(kname)
+
+    def _getKeys(self, subdir=None):
 
         """ Loop over all keys in a given subfolder. """
 
@@ -43,20 +53,13 @@ class plots(object):
                 kname = '{}/{}'.format(subdir, key.GetName())
             else:
                 kname = key.GetName()
+
             # If key is a folder, go into that folder and loop over all keys
             if key.IsFolder():
-                self._loopKeys(kname)
-                continue
-
-            # Clear all objects from canvas
-            self._canvas.Clear()
-
-            # Get histogram and draw it
-            histo = self._rootfile.Get(kname)
-            histo.Draw()
-
-            # Save it as pdf
-            self._save(kname)
+                for knamesub in self._getKeys(kname):
+                    yield knamesub
+            else:
+                yield kname
 
     def _save(self, name):
 
