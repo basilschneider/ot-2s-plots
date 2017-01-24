@@ -7,4 +7,5 @@ from plots import plots
 if __name__ == "__main__":
 
     plots = plots('Commissioning.root', 'test01')
-    plots.getAllPlots()
+    #plots.getAllPlots()
+    plots.getScurvePerCbc([4, 7])

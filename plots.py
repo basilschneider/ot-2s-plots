@@ -3,7 +3,7 @@
 """ Extract all plots from Middleware scan. """
 
 from os import makedirs, chdir, getcwd, path
-from ROOT import TFile, TCanvas
+from ROOT import TFile, TCanvas, Math, TF1
 
 class plots(object):
 
@@ -34,9 +34,84 @@ class plots(object):
             # Save it as pdf
             self._save(kname)
 
+    def getScurvePerCbc(self, cbcs=range(0, 8)):
+
+        """ Fit all Scurves and put them into one histogram.
+        Parameters:
+            cbcs: List of CBC's to plot
+            """
+
+        dirname = 'Final0'
+
+        for cbc in cbcs:
+
+            # Need to make histograms persistens
+            histos = []
+
+            # Also store fit results
+            shifts = []  # pedestals
+            widths = []  # noise
+
+            # Loop over all keys in subdirectory
+            for kname in self._getKeys(dirname):
+
+                # Only select S-Curves
+                if not kname.startswith('{}/Scurve_Be0_Fe0_Cbc{}'
+                                        .format(dirname, cbc)):
+                    continue
+
+                # Error function with guessed parameters
+                errf = TF1('errf', '.5 + .5*erf((x-[0])/[1])', 0., 254.)
+                errf.SetParameter(0, 120.)  # shift
+                errf.SetParameter(1, 10.)  # width
+
+                # Fit
+                histo = self._rootfile.Get(kname)
+                histo.Fit('errf', 'RQ')
+
+                histo.Draw()
+
+                # Save it as pdf
+                self._save('{}_fit'.format(kname))
+
+                # Save values for future use
+                histos.append(histo)
+                shifts.append(histo.GetFunction('errf').GetParameter(0))
+                widths.append(histo.GetFunction('errf').GetParameter(1))
+
+            self._canvas.Clear()
+
+            # Draw all error functions in one histogram
+            for idx, histo in enumerate(histos):
+
+                # Get fitted function
+                func = histo.GetFunction('errf')
+                # Dynamically set plot range
+                func.SetRange(min([shift-2*width for shift, width
+                                   in zip(shifts, widths)]),
+                              max([shift+2*width for shift, width
+                                   in zip(shifts, widths)]))
+
+                # Colors!
+                func.SetLineColor(self._getColor(idx))
+
+                if idx == 0:
+                    func.Draw()
+                    func.SetTitle('S-curves for CBC {}'.format(cbc))
+                    func.GetXaxis().SetTitle('VCth units')
+                    func.GetYaxis().SetTitle('Occupancy')
+                else:
+                    func.Draw('same')
+
+            self._save('scurves_cbc{}'.format(cbc))
+
     def _getKeys(self, subdir=None):
 
-        """ Loop over all keys in a given subfolder. """
+        """ Loop over all keys in a given subfolder.
+        Parameters:
+            subdir: Get keys only from that directory, including all
+                    subdirectories
+        """
 
         # If subdir is defined, loop over keys in folder, otherwise loop over
         # keys in rootfile
@@ -63,7 +138,11 @@ class plots(object):
 
     def _save(self, name):
 
-        """ Save histogram as *.pdf. """
+        """ Save histogram as *.pdf.
+        Parameters:
+            name: Name of *.pdf, possibly including path; directories are
+                  created on the fly
+        """
 
         # Go into directory if it is defined
         if self._directory:
@@ -85,3 +164,21 @@ class plots(object):
         # Go back to original working directories
         if self._directory:
             chdir(cwd)
+
+    def _getColor(self, idx):
+
+        """ Get color for a given index (channel).
+        Parameters:
+            idx: Channel number
+        """
+
+        # List with all colors
+        colors = []
+        colors.extend(range(390, 405))
+        colors.extend(range(406, 421))
+        colors.extend(range(422, 437))
+        colors.extend(range(590, 605))
+        colors.extend(range(606, 621))
+        colors.extend(range(622, 637))
+        colors.extend(range(791, 911))
+        return colors[idx % len(colors)]
