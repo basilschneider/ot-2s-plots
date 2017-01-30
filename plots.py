@@ -3,7 +3,7 @@
 """ Extract all plots from Middleware scan. """
 
 from os import makedirs, chdir, getcwd, path
-from ROOT import TFile, TCanvas, Math, TF1
+from ROOT import TFile, TCanvas, Math, TF1, TH1F
 
 class plots(object):
 
@@ -36,74 +36,94 @@ class plots(object):
 
     def getScurvePerCbc(self, cbcs=range(0, 8)):
 
-        """ Fit all Scurves and put them into one histogram.
+        """ Fit all Scurves and put them into one histogram. Also plot shifts
+        (offsets) and widths (noise).
         Parameters:
             cbcs: List of CBC's to plot
-            """
+        """
+
+        for cbc in cbcs:
+            self._drawScurves(cbc)
+
+    def _drawScurves(self, cbc):
+
+        """ Make the fits to draw the Scurves.
+        Parameters:
+            cbc: CBC to plot
+        """
 
         dirname = 'Final0'
 
-        for cbc in cbcs:
+        # Need to make histograms persistens
+        histos = []
 
-            # Need to make histograms persistens
-            histos = []
+        # Also store fit results
+        shifts = []  # offset
+        widths = []  # noise
 
-            # Also store fit results
-            shifts = []  # pedestals
-            widths = []  # noise
+        # Loop over all keys in subdirectory
+        for kname in self._getKeys(dirname):
 
-            # Loop over all keys in subdirectory
-            for kname in self._getKeys(dirname):
+            # Only select S-Curves
+            if not kname.startswith('{}/Scurve_Be0_Fe0_Cbc{}'
+                                    .format(dirname, cbc)):
+                continue
 
-                # Only select S-Curves
-                if not kname.startswith('{}/Scurve_Be0_Fe0_Cbc{}'
-                                        .format(dirname, cbc)):
-                    continue
+            # Error function with guessed parameters
+            errf = TF1('errf', '.5 + .5*erf((x-[0])/[1])', 0., 254.)
+            errf.SetParameter(0, 120.)  # shift
+            errf.SetParameter(1, 10.)  # width
 
-                # Error function with guessed parameters
-                errf = TF1('errf', '.5 + .5*erf((x-[0])/[1])', 0., 254.)
-                errf.SetParameter(0, 120.)  # shift
-                errf.SetParameter(1, 10.)  # width
+            # Fit
+            histo = self._rootfile.Get(kname)
+            histo.Fit('errf', 'RQ')
 
-                # Fit
-                histo = self._rootfile.Get(kname)
-                histo.Fit('errf', 'RQ')
+            histo.Draw()
 
-                histo.Draw()
+            # Save it as pdf
+            self._save('{}_fit'.format(kname))
 
-                # Save it as pdf
-                self._save('{}_fit'.format(kname))
+            # Save values for future use
+            histos.append(histo)
+            shifts.append(histo.GetFunction('errf').GetParameter(0))
+            widths.append(histo.GetFunction('errf').GetParameter(1))
 
-                # Save values for future use
-                histos.append(histo)
-                shifts.append(histo.GetFunction('errf').GetParameter(0))
-                widths.append(histo.GetFunction('errf').GetParameter(1))
+        # Draw all error functions in one histogram
+        self._canvas.Clear()
 
-            self._canvas.Clear()
+        for idx, histo in enumerate(histos):
 
-            # Draw all error functions in one histogram
-            for idx, histo in enumerate(histos):
+            # Get fitted function
+            func = histo.GetFunction('errf')
+            # Dynamically set plot range
+            func.SetRange(min([shift-2*width for shift, width
+                               in zip(shifts, widths)]),
+                          max([shift+2*width for shift, width
+                               in zip(shifts, widths)]))
 
-                # Get fitted function
-                func = histo.GetFunction('errf')
-                # Dynamically set plot range
-                func.SetRange(min([shift-2*width for shift, width
-                                   in zip(shifts, widths)]),
-                              max([shift+2*width for shift, width
-                                   in zip(shifts, widths)]))
+            # Colors!
+            func.SetLineColor(self._getColor(idx))
 
-                # Colors!
-                func.SetLineColor(self._getColor(idx))
+            if idx == 0:
+                func.Draw()
+                func.SetTitle('S-curves for CBC {}'.format(cbc))
+                func.GetXaxis().SetTitle('VCth units')
+                func.GetYaxis().SetTitle('Occupancy')
+            else:
+                func.Draw('same')
 
-                if idx == 0:
-                    func.Draw()
-                    func.SetTitle('S-curves for CBC {}'.format(cbc))
-                    func.GetXaxis().SetTitle('VCth units')
-                    func.GetYaxis().SetTitle('Occupancy')
-                else:
-                    func.Draw('same')
+        self._save('scurves_cbc{}'.format(cbc))
 
-            self._save('scurves_cbc{}'.format(cbc))
+        # Draw all shifts (offsets) in one histogram
+        self._canvas.Clear()
+        histo = TH1F('h', 'h', 254, -.5, 253.5)
+
+        for idx, shift in enumerate(shifts):
+            histo.Fill(idx, shift)
+
+        histo.Draw('HIST')
+
+        self._save('scurves_shifts_cbc{}'.format(cbc))
 
     def _getKeys(self, subdir=None):
 
