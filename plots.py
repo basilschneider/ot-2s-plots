@@ -93,6 +93,27 @@ class plots(object):
 
         for idx, histo in enumerate(histos):
 
+            # Colors!
+            histo.SetLineColor(self._getColor(idx))
+
+            if idx == 0:
+                histo.Draw('C')
+                histo.SetTitle('S-curves for CBC {}'.format(cbc))
+                histo.GetXaxis().SetTitle('VCth units')
+                histo.GetYaxis().SetTitle('Occupancy')
+            else:
+                histo.Draw('C same')
+
+        self._save('scurves_cbc{}'.format(cbc))
+        self._canvas.SetLogy()
+        self._save('scurves_cbc{}_log'.format(cbc))
+        self._canvas.SetLogy(False)
+
+        # Draw all fitted error functions in one histogram
+        self._canvas.Clear()
+
+        for idx, histo in enumerate(histos):
+
             # Get fitted function
             func = histo.GetFunction('errf')
             # Dynamically set plot range
@@ -112,18 +133,7 @@ class plots(object):
             else:
                 func.Draw('same')
 
-        self._save('scurves_cbc{}'.format(cbc))
-
-        # Draw all shifts (offsets) in one histogram
-        self._canvas.Clear()
-        histo = TH1F('h', 'h', 254, -.5, 253.5)
-
-        for idx, shift in enumerate(shifts):
-            histo.Fill(idx, shift)
-
-        histo.Draw('HIST')
-
-        self._save('scurves_shifts_cbc{}'.format(cbc))
+        self._save('scurves_cbc{}_fit'.format(cbc))
 
     def _getKeys(self, subdir=None):
 
