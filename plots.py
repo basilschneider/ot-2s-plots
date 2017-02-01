@@ -42,22 +42,24 @@ class plots(object):
             # Save it as pdf
             self._save(kname)
 
-    def getScurvePerCbc(self, cbcs=range(0, 8)):
+    def getScurvePerCbc(self, cbcs=range(0, 8), channels=-1):
 
         """ Fit all Scurves and put them into one histogram. Also plot shifts
         (offsets) and widths (noise).
         Parameters:
             cbcs: List of CBC's to plot
+            channels: Number of channels to plot; -1 for all
         """
 
         for cbc in cbcs:
-            self._drawScurves(cbc)
+            self._drawScurves(cbc, channels)
 
-    def _drawScurves(self, cbc):
+    def _drawScurves(self, cbc, channels):
 
         """ Make the fits to draw the Scurves.
         Parameters:
             cbc: CBC to plot
+            channels: Number of channels to plot; -1 for all
         """
 
         dirname = 'Final0'
@@ -69,13 +71,22 @@ class plots(object):
         shifts = []  # offset
         widths = []  # noise
 
+        count = 0
+
         # Loop over all keys in subdirectory
         for kname in self._getKeys(dirname):
+
+            # Only plot a limited number of channels
+            if channels > 0 and count >= channels:
+                break
 
             # Only select S-Curves of a given CBC
             if not kname.startswith('{}/Scurve_Be0_Fe0_Cbc{}'
                                     .format(dirname, cbc)):
                 continue
+
+            # Count the number of histograms
+            count += 1
 
             # Error function with guessed parameters
             errf = TF1('errf', '.5 + .5*erf((x-[0])/[1])', 0., 254.)
