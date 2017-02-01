@@ -85,9 +85,6 @@ class plots(object):
                                     .format(dirname, cbc)):
                 continue
 
-            # Count the number of histograms
-            count += 1
-
             # Error function with guessed parameters
             errf = TF1('errf', '.5 + .5*erf((x-[0])/[1])', 0., 254.)
             errf.SetParameter(0, 120.)  # shift
@@ -96,6 +93,15 @@ class plots(object):
             # Fit
             histo = self._rootfile.Get(kname)
             histo.Fit('errf', 'RQ')
+
+            # Colors!
+            histo.SetLineColor(self._getColor(count, (channels>0 and channels<19)))
+            histo.SetMarkerColor(self._getColor(count, (channels>0 and channels<19)))
+            histo.GetFunction('errf').SetLineColor(self._getColor(count, (channels>0 and channels<19)))
+
+            # Markers!
+            histo.SetMarkerStyle(count % 15 + 20)
+            histo.SetMarkerSize(.8)
 
             # Save values for future use
             histos.append(histo)
@@ -109,6 +115,9 @@ class plots(object):
             # Save smoothed histogram
             histo.Draw('C HIST')
             self._save('{}_smooth'.format(kname))
+
+            # Count the number of histograms
+            count += 1
 
         # Draw all error functions in one histogram
         self._draw_all_errf(histos, shifts, widths, cbc)
@@ -132,12 +141,6 @@ class plots(object):
         self._canvas.Clear()
 
         for idx, histo in enumerate(histos):
-
-            # Colors!
-            if len(histos) < 19:
-                histo.SetLineColor(self._getColor(idx, True))
-            else:
-                histo.SetLineColor(self._getColor(idx, False))
 
             if idx == 0:
                 # Dynamically set plot range
@@ -172,12 +175,6 @@ class plots(object):
             # Get fitted function
             func = histo.GetFunction('errf')
 
-            # Colors!
-            if len(histos) < 19:
-                func.SetLineColor(self._getColor(idx, True))
-            else:
-                func.SetLineColor(self._getColor(idx, False))
-
             if idx == 0:
                 # Dynamically set plot range
                 func.SetRange(min([shift-2*width for shift, width
@@ -207,18 +204,6 @@ class plots(object):
         self._canvas.Clear()
 
         for idx, histo in enumerate(histos):
-
-            # Colors!
-            if len(histos) < 19:
-                histo.SetLineColor(self._getColor(idx, True))
-                histo.SetMarkerColor(self._getColor(idx, True))
-            else:
-                histo.SetLineColor(self._getColor(idx, False))
-                histo.SetMarkerColor(self._getColor(idx, False))
-
-            # Markers!
-            histo.SetMarkerStyle(idx % 15 + 20)
-            histo.SetMarkerSize(.8)
 
             if idx == 0:
                 # Dynamically set plot range
