@@ -257,7 +257,8 @@ class plots(object):
 
         # List with all colors
         colors = []
-        colors.extend(range(390, 405))
+        #colors.extend(range(390, 405))
+        colors.extend(range(394, 405))
         colors.extend(range(406, 421))
         colors.extend(range(422, 437))
         colors.extend(range(590, 605))
