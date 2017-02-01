@@ -116,6 +116,9 @@ class plots(object):
         # Draw all fitted error functions in one histogram
         self._draw_all_errf_fit(histos, shifts, widths, cbc)
 
+        # Draw all fitted error functions and measurements in one histogram
+        self._draw_all_errf_fit_meas(histos, shifts, widths, cbc)
+
     def _draw_all_errf(self, histos, shifts, widths, cbc):
 
         """ Draw all error functions in one histogram
@@ -184,6 +187,44 @@ class plots(object):
 
         self._save('scurves_cbc{}_fit'.format(cbc))
         self._save('scurves_cbc{}_fit_log'.format(cbc), True)
+
+    def _draw_all_errf_fit_meas(self, histos, shifts, widths, cbc):
+
+        """ Draw all error functions in one histogram
+        Parameters:
+            histos: List of histograms with fitted error functions
+            shifts: List of shifts used for fitting error functions
+            widths: List of widths used for fitting error functions
+            cbc: CBC to plot
+        """
+
+        self._canvas.Clear()
+
+        for idx, histo in enumerate(histos):
+
+            # Colors!
+            histo.SetLineColor(self._getColor(idx))
+
+            # Markers!
+            histo.SetMarkerStyle(idx % 15 + 20)
+            histo.SetMarkerSize(.8)
+            histo.SetMarkerColor(self._getColor(idx))
+
+            if idx == 0:
+                # Dynamically set plot range
+                histo.GetXaxis().SetRangeUser(min([shift-5*width for shift, width
+                                                   in zip(shifts, widths)]),
+                                              max([shift+5*width for shift, width
+                                                   in zip(shifts, widths)]))
+                histo.Draw('P')
+                histo.SetTitle('Fitted S-curves for CBC {}'.format(cbc))
+                histo.GetXaxis().SetTitle('VCth units')
+                histo.GetYaxis().SetTitle('Occupancy')
+            else:
+                histo.Draw('P SAME')
+
+        self._save('scurves_cbc{}_fit_meas'.format(cbc))
+        self._save('scurves_cbc{}_fit_meas_log'.format(cbc), True)
 
     def _getKeys(self, subdir=None):
 

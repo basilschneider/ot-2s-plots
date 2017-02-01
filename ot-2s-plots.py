@@ -8,4 +8,4 @@ if __name__ == "__main__":
 
     plots = plots('Commissioning_HV.root', 'test01/')
     #plots.getAllPlots()
-    plots.getScurvePerCbc([0, 1], 1)
+    plots.getScurvePerCbc([0, 1], 10)
