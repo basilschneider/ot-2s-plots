@@ -144,10 +144,8 @@ class plots(object):
 
             if idx == 0:
                 # Dynamically set plot range
-                histo.GetXaxis().SetRangeUser(min([shift-2*width for shift, width
-                                                   in zip(shifts, widths)]),
-                                              max([shift+2*width for shift, width
-                                                   in zip(shifts, widths)]))
+                histo.GetXaxis().SetRangeUser(self._getXmin(shifts, widths),
+                                              self._getXmax(shifts, widths))
                 histo.Draw('C HIST')
                 histo.SetTitle('S-curves for CBC {}'.format(cbc))
                 histo.GetXaxis().SetTitle('VCth units')
@@ -177,10 +175,8 @@ class plots(object):
 
             if idx == 0:
                 # Dynamically set plot range
-                func.SetRange(min([shift-2*width for shift, width
-                                   in zip(shifts, widths)]),
-                              max([shift+2*width for shift, width
-                                   in zip(shifts, widths)]))
+                func.SetRange(self._getXmin(shifts, widths),
+                              self._getXmax(shifts, widths))
                 func.Draw()
                 func.SetTitle('Fitted S-curves for CBC {}'.format(cbc))
                 func.GetXaxis().SetTitle('VCth units')
@@ -207,10 +203,8 @@ class plots(object):
 
             if idx == 0:
                 # Dynamically set plot range
-                histo.GetXaxis().SetRangeUser(min([shift-5*width for shift, width
-                                                   in zip(shifts, widths)]),
-                                              max([shift+5*width for shift, width
-                                                   in zip(shifts, widths)]))
+                histo.GetXaxis().SetRangeUser(self._getXmin(shifts, widths),
+                                              self._getXmax(shifts, widths))
                 histo.Draw('P')
                 histo.SetTitle('Fitted S-curves for CBC {}'.format(cbc))
                 histo.GetXaxis().SetTitle('VCth units')
@@ -294,6 +288,26 @@ class plots(object):
         # Go back to original working directories
         if self._directory:
             chdir(cwd)
+
+    def _getXmin(self, shifts, widths):
+
+        """ Get minimum on X-Axis to plot.
+        Parameters:
+            shifts: List of shifts from error functions
+            widths: List of widths from error functions
+        """
+
+        return min([shift-5*width for shift, width in zip(shifts, widths)])
+
+    def _getXmax(self, shifts, widths):
+
+        """ Get maximum on X-Axis to plot.
+        Parameters:
+            shifts: List of shifts from error functions
+            widths: List of widths from error functions
+        """
+
+        return max([shift+5*width for shift, width in zip(shifts, widths)])
 
     def _getColor(self, idx, nice=False):
 
