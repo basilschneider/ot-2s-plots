@@ -108,6 +108,11 @@ class plots(object):
 
         for idx, histo in enumerate(histos):
 
+            # Dynamically set plot range
+            histo.GetXaxis().SetRangeUser(min([shift-2*width for shift, width
+                                               in zip(shifts, widths)]),
+                                          max([shift+2*width for shift, width
+                                               in zip(shifts, widths)]))
             # Colors!
             histo.SetLineColor(self._getColor(idx))
 
