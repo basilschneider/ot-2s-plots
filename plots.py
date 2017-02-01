@@ -156,7 +156,7 @@ class plots(object):
 
             if idx == 0:
                 func.Draw()
-                func.SetTitle('S-curves for CBC {}'.format(cbc))
+                func.SetTitle('Fitted S-curves for CBC {}'.format(cbc))
                 func.GetXaxis().SetTitle('VCth units')
                 func.GetYaxis().SetTitle('Occupancy')
             else:
