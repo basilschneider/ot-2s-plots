@@ -117,12 +117,12 @@ class plots(object):
             histo.SetLineColor(self._getColor(idx))
 
             if idx == 0:
-                histo.Draw('C')
+                histo.Draw('C HIST')
                 histo.SetTitle('S-curves for CBC {}'.format(cbc))
                 histo.GetXaxis().SetTitle('VCth units')
                 histo.GetYaxis().SetTitle('Occupancy')
             else:
-                histo.Draw('C same')
+                histo.Draw('C HIST SAME')
 
         self._save('scurves_cbc{}'.format(cbc))
         self._canvas.SetLogy()
@@ -160,7 +160,7 @@ class plots(object):
                 func.GetXaxis().SetTitle('VCth units')
                 func.GetYaxis().SetTitle('Occupancy')
             else:
-                func.Draw('same')
+                func.Draw('SAME')
 
         self._save('scurves_cbc{}_fit'.format(cbc))
 
