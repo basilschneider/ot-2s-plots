@@ -79,15 +79,18 @@ class plots(object):
             histo = self._rootfile.Get(kname)
             histo.Fit('errf', 'RQ')
 
-            histo.Draw()
-
-            # Save it as pdf
-            self._save('{}_fit'.format(kname))
-
             # Save values for future use
             histos.append(histo)
             shifts.append(histo.GetFunction('errf').GetParameter(0))
             widths.append(histo.GetFunction('errf').GetParameter(1))
+
+            # Save histogram with fit
+            histo.Draw()
+            self._save('{}_fit'.format(kname))
+
+            # Save smoothed histogram
+            histo.Draw('C HIST')
+            self._save('{}_smooth'.format(kname))
 
         # Draw all error functions in one histogram
         self._draw_all_errf(histos, shifts, widths, cbc)
