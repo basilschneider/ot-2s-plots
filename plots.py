@@ -247,7 +247,7 @@ class plots(object):
             # is the frame, the second one an object, if this is not the case,
             # it might fail
             try:
-                self._canvas.GetListOfPrimitives().At(1).GetYaxis().SetRangeUser(1e-7, 1.)
+                self._canvas.GetListOfPrimitives().At(1).GetYaxis().SetRangeUser(1e-7, 2.)
             except AttributeError:
                 LGR.warning('Cannot set Y-Axis to log')
 
