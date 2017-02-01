@@ -134,7 +134,10 @@ class plots(object):
         for idx, histo in enumerate(histos):
 
             # Colors!
-            histo.SetLineColor(self._getColor(idx))
+            if len(histos) < 19:
+                histo.SetLineColor(self._getColor(idx, True))
+            else:
+                histo.SetLineColor(self._getColor(idx, False))
 
             if idx == 0:
                 # Dynamically set plot range
@@ -170,7 +173,10 @@ class plots(object):
             func = histo.GetFunction('errf')
 
             # Colors!
-            func.SetLineColor(self._getColor(idx))
+            if len(histos) < 19:
+                func.SetLineColor(self._getColor(idx, True))
+            else:
+                func.SetLineColor(self._getColor(idx, False))
 
             if idx == 0:
                 # Dynamically set plot range
@@ -203,12 +209,16 @@ class plots(object):
         for idx, histo in enumerate(histos):
 
             # Colors!
-            histo.SetLineColor(self._getColor(idx))
+            if len(histos) < 19:
+                histo.SetLineColor(self._getColor(idx, True))
+                histo.SetMarkerColor(self._getColor(idx, True))
+            else:
+                histo.SetLineColor(self._getColor(idx, False))
+                histo.SetMarkerColor(self._getColor(idx, False))
 
             # Markers!
             histo.SetMarkerStyle(idx % 15 + 20)
             histo.SetMarkerSize(.8)
-            histo.SetMarkerColor(self._getColor(idx))
 
             if idx == 0:
                 # Dynamically set plot range
@@ -300,21 +310,27 @@ class plots(object):
         if self._directory:
             chdir(cwd)
 
-    def _getColor(self, idx):
+    def _getColor(self, idx, nice=False):
 
         """ Get color for a given index (channel).
         Parameters:
             idx: Channel number
+            nice: if True, get a handful of easily distinguishable colors; if
+                  False, get all colors
         """
 
         # List with all colors
         colors = []
-        #colors.extend(range(390, 405))
-        colors.extend(range(394, 405))
-        colors.extend(range(406, 421))
-        colors.extend(range(422, 437))
-        colors.extend(range(590, 605))
-        colors.extend(range(606, 621))
-        colors.extend(range(622, 637))
-        colors.extend(range(791, 911))
+        if nice:
+            colors.extend(range(2, 10))
+        else:
+            #colors.extend(range(390, 405))
+            colors.extend(range(394, 405))
+            colors.extend(range(406, 421))
+            colors.extend(range(422, 437))
+            colors.extend(range(590, 605))
+            colors.extend(range(606, 621))
+            colors.extend(range(622, 637))
+            colors.extend(range(791, 911))
+
         return colors[idx % len(colors)]
