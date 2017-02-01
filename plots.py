@@ -2,8 +2,15 @@
 
 """ Extract all plots from Middleware scan. """
 
+import logging
 from os import makedirs, chdir, getcwd, path
 from ROOT import TFile, TCanvas, Math, TF1, gStyle
+
+# Set up logger
+# DEBUG (10), INFO (20), WARNING(30), ERROR(40), CRITICAL(50)
+logging.basicConfig(format='%(levelname)-8s - %(message)s',
+                    level=logging.INFO)
+LGR = logging.getLogger(__name__)
 
 class plots(object):
 
