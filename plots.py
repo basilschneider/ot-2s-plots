@@ -283,7 +283,14 @@ class plots(object):
 
         # Save as *.pdf
         self._canvas.SaveAs('{}.pdf'.format(name))
-        self._canvas.SetLogy(False)
+
+        # Unset log scale
+        if logy:
+            self._canvas.SetLogy(False)
+            try:
+                self._canvas.GetListOfPrimitives().At(1).GetYaxis().SetRangeUser(1e-7, 1.05)
+            except AttributeError:
+                pass
 
         # Go back to original working directories
         if self._directory:
