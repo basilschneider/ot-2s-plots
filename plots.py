@@ -232,7 +232,13 @@ class plots(object):
         # Set Y-axis to log if requested
         if logy:
             self._canvas.SetLogy()
-            self._canvas.GetListOfPrimitives().At(1).GetYaxis().SetRangeUser(1e-7, 1.)
+            # This is probably not failsafe, empirically, the first primitive
+            # is the frame, the second one an object, if this is not the case,
+            # it might fail
+            try:
+                self._canvas.GetListOfPrimitives().At(1).GetYaxis().SetRangeUser(1e-7, 1.)
+            except AttributeError:
+                LGR.warning('Cannot set Y-Axis to log')
 
         # Save as *.pdf
         self._canvas.SaveAs('{}.pdf'.format(name))
