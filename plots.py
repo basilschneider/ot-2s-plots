@@ -72,7 +72,7 @@ class plots(object):
         # Loop over all keys in subdirectory
         for kname in self._getKeys(dirname):
 
-            # Only select S-Curves
+            # Only select S-Curves of a given CBC
             if not kname.startswith('{}/Scurve_Be0_Fe0_Cbc{}'
                                     .format(dirname, cbc)):
                 continue
