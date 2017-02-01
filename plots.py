@@ -89,6 +89,21 @@ class plots(object):
             widths.append(histo.GetFunction('errf').GetParameter(1))
 
         # Draw all error functions in one histogram
+        self._draw_all_errf(histos, shifts, widths, cbc)
+
+        # Draw all fitted error functions in one histogram
+        self._draw_all_errf_fit(histos, shifts, widths, cbc)
+
+    def _draw_all_errf(self, histos, shifts, widths, cbc):
+
+        """ Draw all error functions in one histogram
+        Parameters:
+            histos: List of histograms with fitted error functions
+            shifts: List of shifts used for fitting error functions
+            widths: List of widths used for fitting error functions
+            cbc: CBC to plot
+        """
+
         self._canvas.Clear()
 
         for idx, histo in enumerate(histos):
@@ -109,7 +124,16 @@ class plots(object):
         self._save('scurves_cbc{}_log'.format(cbc))
         self._canvas.SetLogy(False)
 
-        # Draw all fitted error functions in one histogram
+    def _draw_all_errf_fit(self, histos, shifts, widths, cbc):
+
+        """ Draw all error functions in one histogram
+        Parameters:
+            histos: List of histograms with fitted error functions
+            shifts: List of shifts used for fitting error functions
+            widths: List of widths used for fitting error functions
+            cbc: CBC to plot
+        """
+
         self._canvas.Clear()
 
         for idx, histo in enumerate(histos):

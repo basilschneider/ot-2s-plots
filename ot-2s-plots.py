@@ -6,6 +6,6 @@ from plots import plots
 
 if __name__ == "__main__":
 
-    plots = plots('Commissioning_good.root', 'test01/')
+    plots = plots('Commissioning_HV.root', 'test01/')
     #plots.getAllPlots()
     plots.getScurvePerCbc([0, 1])
