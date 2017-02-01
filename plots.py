@@ -3,7 +3,7 @@
 """ Extract all plots from Middleware scan. """
 
 from os import makedirs, chdir, getcwd, path
-from ROOT import TFile, TCanvas, Math, TF1, TH1F
+from ROOT import TFile, TCanvas, Math, TF1, TH1F, gStyle
 
 class plots(object):
 
@@ -17,6 +17,7 @@ class plots(object):
         self._directory = outputfolder
         self._canvas = TCanvas()
         makedirs(outputfolder)
+        gStyle.SetOptStat(000000000)
 
     def getAllPlots(self):
 
