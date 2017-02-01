@@ -129,10 +129,7 @@ class plots(object):
                 histo.Draw('C HIST SAME')
 
         self._save('scurves_cbc{}'.format(cbc))
-        self._canvas.SetLogy()
-        self._canvas.GetListOfPrimitives().At(1).GetYaxis().SetRangeUser(1e-7, 1.)
-        self._save('scurves_cbc{}_log'.format(cbc))
-        self._canvas.SetLogy(False)
+        self._save('scurves_cbc{}_log'.format(cbc), True)
 
     def _draw_all_errf_fit(self, histos, shifts, widths, cbc):
 
@@ -168,11 +165,7 @@ class plots(object):
                 func.Draw('SAME')
 
         self._save('scurves_cbc{}_fit'.format(cbc))
-        self._canvas.SetLogy()
-        self._canvas.GetListOfPrimitives().At(1).GetYaxis().SetRangeUser(1e-7, 1.)
-        self._save('scurves_cbc{}_fit_log'.format(cbc))
-        self._canvas.SetLogy(False)
-
+        self._save('scurves_cbc{}_fit_log'.format(cbc), True)
 
     def _getKeys(self, subdir=None):
 
@@ -205,12 +198,13 @@ class plots(object):
             else:
                 yield kname
 
-    def _save(self, name):
+    def _save(self, name, logy=False):
 
         """ Save histogram as *.pdf.
         Parameters:
             name: Name of *.pdf, possibly including path; directories are
                   created on the fly
+            logy: Plot Y-axis in log
         """
 
         # Go into directory if it is defined
@@ -228,7 +222,14 @@ class plots(object):
             if not path.exists(subdir):
                 makedirs(subdir)
 
+        # Set Y-axis to log if requested
+        if logy:
+            self._canvas.SetLogy()
+            self._canvas.GetListOfPrimitives().At(1).GetYaxis().SetRangeUser(1e-7, 1.)
+
+        # Save as *.pdf
         self._canvas.SaveAs('{}.pdf'.format(name))
+        self._canvas.SetLogy(False)
 
         # Go back to original working directories
         if self._directory:
