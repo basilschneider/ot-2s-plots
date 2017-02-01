@@ -112,15 +112,15 @@ class plots(object):
 
         for idx, histo in enumerate(histos):
 
-            # Dynamically set plot range
-            histo.GetXaxis().SetRangeUser(min([shift-2*width for shift, width
-                                               in zip(shifts, widths)]),
-                                          max([shift+2*width for shift, width
-                                               in zip(shifts, widths)]))
             # Colors!
             histo.SetLineColor(self._getColor(idx))
 
             if idx == 0:
+                # Dynamically set plot range
+                histo.GetXaxis().SetRangeUser(min([shift-2*width for shift, width
+                                                   in zip(shifts, widths)]),
+                                              max([shift+2*width for shift, width
+                                                   in zip(shifts, widths)]))
                 histo.Draw('C HIST')
                 histo.SetTitle('S-curves for CBC {}'.format(cbc))
                 histo.GetXaxis().SetTitle('VCth units')
@@ -149,16 +149,16 @@ class plots(object):
 
             # Get fitted function
             func = histo.GetFunction('errf')
-            # Dynamically set plot range
-            func.SetRange(min([shift-2*width for shift, width
-                               in zip(shifts, widths)]),
-                          max([shift+2*width for shift, width
-                               in zip(shifts, widths)]))
 
             # Colors!
             func.SetLineColor(self._getColor(idx))
 
             if idx == 0:
+                # Dynamically set plot range
+                func.SetRange(min([shift-2*width for shift, width
+                                   in zip(shifts, widths)]),
+                              max([shift+2*width for shift, width
+                                   in zip(shifts, widths)]))
                 func.Draw()
                 func.SetTitle('Fitted S-curves for CBC {}'.format(cbc))
                 func.GetXaxis().SetTitle('VCth units')
