@@ -3,7 +3,7 @@
 """ Extract all plots from Middleware scan. """
 
 from os import makedirs, chdir, getcwd, path
-from ROOT import TFile, TCanvas, Math, TF1, TH1F, gStyle
+from ROOT import TFile, TCanvas, Math, TF1, gStyle
 
 class plots(object):
 
@@ -130,6 +130,7 @@ class plots(object):
 
         self._save('scurves_cbc{}'.format(cbc))
         self._canvas.SetLogy()
+        self._canvas.GetListOfPrimitives().At(1).GetYaxis().SetRangeUser(1e-7, 1.)
         self._save('scurves_cbc{}_log'.format(cbc))
         self._canvas.SetLogy(False)
 
@@ -167,6 +168,11 @@ class plots(object):
                 func.Draw('SAME')
 
         self._save('scurves_cbc{}_fit'.format(cbc))
+        self._canvas.SetLogy()
+        self._canvas.GetListOfPrimitives().At(1).GetYaxis().SetRangeUser(1e-7, 1.)
+        self._save('scurves_cbc{}_fit_log'.format(cbc))
+        self._canvas.SetLogy(False)
+
 
     def _getKeys(self, subdir=None):
 
