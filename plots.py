@@ -97,16 +97,23 @@ class plots(object):
             # Colors!
             histo.SetLineColor(self._getColor(count, (channels>0 and channels<19)))
             histo.SetMarkerColor(self._getColor(count, (channels>0 and channels<19)))
-            histo.GetFunction('errf').SetLineColor(self._getColor(count, (channels>0 and channels<19)))
+            try:
+                histo.GetFunction('errf').SetLineColor(self._getColor(count, (channels>0 and channels<19)))
+            except ReferenceError:
+                pass
 
             # Markers!
             histo.SetMarkerStyle(count % 15 + 20)
             histo.SetMarkerSize(.8)
 
             # Save values for future use
-            histos.append(histo)
-            shifts.append(histo.GetFunction('errf').GetParameter(0))
-            widths.append(histo.GetFunction('errf').GetParameter(1))
+            # Only save them if the fit worked
+            try:
+                shifts.append(histo.GetFunction('errf').GetParameter(0))
+                widths.append(histo.GetFunction('errf').GetParameter(1))
+                histos.append(histo)
+            except TypeError:
+                pass
 
             # Save histogram with fit
             histo.Draw()
