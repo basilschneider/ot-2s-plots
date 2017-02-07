@@ -94,13 +94,16 @@ class plots(object):
             histo = self._rootfile.Get(kname)
             histo.Fit('errf', 'RQ')
 
+            # If fit failed, skip it
+            try:
+                histo.GetFunction('errf').GetParameter(0)
+            except TypeError:
+                continue
+
             # Colors!
             histo.SetLineColor(self._getColor(count, (channels>0 and channels<19)))
             histo.SetMarkerColor(self._getColor(count, (channels>0 and channels<19)))
-            try:
-                histo.GetFunction('errf').SetLineColor(self._getColor(count, (channels>0 and channels<19)))
-            except ReferenceError:
-                pass
+            histo.GetFunction('errf').SetLineColor(self._getColor(count, (channels>0 and channels<19)))
 
             # Markers!
             histo.SetMarkerStyle(count % 15 + 20)
@@ -108,12 +111,9 @@ class plots(object):
 
             # Save values for future use
             # Only save them if the fit worked
-            try:
-                shifts.append(histo.GetFunction('errf').GetParameter(0))
-                widths.append(histo.GetFunction('errf').GetParameter(1))
-                histos.append(histo)
-            except TypeError:
-                pass
+            shifts.append(histo.GetFunction('errf').GetParameter(0))
+            widths.append(histo.GetFunction('errf').GetParameter(1))
+            histos.append(histo)
 
             # Save histogram with fit
             histo.Draw()
