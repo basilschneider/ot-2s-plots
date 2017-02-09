@@ -24,6 +24,8 @@ class plots(object):
         self._directory = outputfolder
         self._canvas = TCanvas()
         self._histos = []
+        self._histos_good = []
+        self._histos_bad = []
         self._shifts = []
         self._widths = []
         makedirs(outputfolder)
@@ -71,6 +73,9 @@ class plots(object):
         # Counter of fitted histograms
         count = 0
 
+        # Chi2 limit to distinguish good from bad fits
+        chi2 = .05
+
         # Loop over all keys in subdirectory
         for kname in self._getKeys(dirname):
 
@@ -108,10 +113,15 @@ class plots(object):
             histo.SetMarkerSize(.8)
 
             # Save values for future use
-            # Only save them if the fit worked
             self._shifts.append(histo.GetFunction('errf').GetParameter(0))
             self._widths.append(histo.GetFunction('errf').GetParameter(1))
             self._histos.append(histo)
+
+            # Save histograms either in list of good fits or in list of bad fits
+            if histo.GetFunction('errf').GetChisquare() <= chi2:
+                self._histos_good.append(histo)
+            else:
+                self._histos_bad.append(histo)
 
             # Save histogram with fit
             histo.Draw()
@@ -127,6 +137,18 @@ class plots(object):
         # Draw all error functions in one histogram
         self._draw_all_errf(self._histos, 'S-curves for CBC {}'.format(cbc),
                             'scurves_cbc{}'.format(cbc))
+
+        # Draw all good error functions in one histogram
+        self._draw_all_errf(self._histos_good,
+                            'S-curves for CBC {} (#chi^{{2}} < {})'
+                            .format(cbc, chi2),
+                            'scurves_cbc{}_good'.format(cbc))
+
+        # Draw all bad error functions in one histogram
+        self._draw_all_errf(self._histos_bad,
+                            'S-curves for CBC {} (#chi^{{2}} > {})'
+                            .format(cbc, chi2),
+                            'scurves_cbc{}_bad'.format(cbc))
 
         # Draw all fitted error functions in one histogram
         self._draw_all_errf_fit(self._histos, 'Fitted S-curves for CBC {}'
