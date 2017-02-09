@@ -65,8 +65,10 @@ class plots(object):
             channels: Number of channels to plot; -1 for all
         """
 
+        # Directory name in rootfile
         dirname = 'Final0'
 
+        # Counter of fitted histograms
         count = 0
 
         # Loop over all keys in subdirectory
@@ -123,48 +125,56 @@ class plots(object):
             count += 1
 
         # Draw all error functions in one histogram
-        self._draw_all_errf(cbc)
+        self._draw_all_errf(self._histos, 'S-curves for CBC {}'.format(cbc),
+                            'scurves_cbc{}'.format(cbc))
 
         # Draw all fitted error functions in one histogram
-        self._draw_all_errf_fit(cbc)
+        self._draw_all_errf_fit(self._histos, 'Fitted S-curves for CBC {}'
+                                .format(cbc), 'scurves_cbc{}_fit'.format(cbc))
 
         # Draw all fitted error functions and measurements in one histogram
-        self._draw_all_errf_fit_meas(cbc)
+        self._draw_all_errf_fit_meas(self._histos, 'Fitted S-curves for CBC {}'
+                                     .format(cbc), 'scurves_cbc{}_fit_meas'
+                                     .format(cbc))
 
-    def _draw_all_errf(self, cbc):
+    def _draw_all_errf(self, histos, title, name):
 
         """ Draw all error functions in one histogram
         Parameters:
-            cbc: CBC to plot
+            histos: List of histograms to plot
+            title: Title of histogram
+            name: Name of histogram
         """
 
         self._canvas.Clear()
 
-        for idx, histo in enumerate(self._histos):
+        for idx, histo in enumerate(histos):
 
             if idx == 0:
                 # Dynamically set plot range
                 histo.GetXaxis().SetRangeUser(self._getXmin(), self._getXmax())
                 histo.Draw('C HIST')
-                histo.SetTitle('S-curves for CBC {}'.format(cbc))
+                histo.SetTitle(title)
                 histo.GetXaxis().SetTitle('VCth units')
                 histo.GetYaxis().SetTitle('Occupancy')
             else:
                 histo.Draw('C HIST SAME')
 
-        self._save('scurves_cbc{}'.format(cbc))
-        self._save('scurves_cbc{}_log'.format(cbc), True)
+        self._save(name)
+        self._save('{}_log'.format(name), True)
 
-    def _draw_all_errf_fit(self, cbc):
+    def _draw_all_errf_fit(self, histos, title, name):
 
         """ Draw all error functions in one histogram
         Parameters:
-            cbc: CBC to plot
+            histos: List of histograms to plot
+            title: Title of histogram
+            name: Name of histogram
         """
 
         self._canvas.Clear()
 
-        for idx, histo in enumerate(self._histos):
+        for idx, histo in enumerate(histos):
 
             # Get fitted function
             func = histo.GetFunction('errf')
@@ -173,38 +183,40 @@ class plots(object):
                 # Dynamically set plot range
                 func.SetRange(self._getXmin(), self._getXmax())
                 func.Draw()
-                func.SetTitle('Fitted S-curves for CBC {}'.format(cbc))
+                func.SetTitle(title)
                 func.GetXaxis().SetTitle('VCth units')
                 func.GetYaxis().SetTitle('Occupancy')
             else:
                 func.Draw('SAME')
 
-        self._save('scurves_cbc{}_fit'.format(cbc))
-        self._save('scurves_cbc{}_fit_log'.format(cbc), True)
+        self._save(name)
+        self._save('{}_log'.format(name), True)
 
-    def _draw_all_errf_fit_meas(self, cbc):
+    def _draw_all_errf_fit_meas(self, histos, title, name):
 
         """ Draw all error functions in one histogram
         Parameters:
-            cbc: CBC to plot
+            histos: List of histograms to plot
+            title: Title of histogram
+            name: Name of histogram
         """
 
         self._canvas.Clear()
 
-        for idx, histo in enumerate(self._histos):
+        for idx, histo in enumerate(histos):
 
             if idx == 0:
                 # Dynamically set plot range
                 histo.GetXaxis().SetRangeUser(self._getXmin(), self._getXmax())
                 histo.Draw('P')
-                histo.SetTitle('Fitted S-curves for CBC {}'.format(cbc))
+                histo.SetTitle(title)
                 histo.GetXaxis().SetTitle('VCth units')
                 histo.GetYaxis().SetTitle('Occupancy')
             else:
                 histo.Draw('P SAME')
 
-        self._save('scurves_cbc{}_fit_meas'.format(cbc))
-        self._save('scurves_cbc{}_fit_meas_log'.format(cbc), True)
+        self._save(name)
+        self._save('{}_log'.format(name), True)
 
     def _getKeys(self, subdir=None):
 
