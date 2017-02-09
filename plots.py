@@ -23,6 +23,9 @@ class plots(object):
         self._rootfile = TFile(inputfile)
         self._directory = outputfolder
         self._canvas = TCanvas()
+        self._histos = []
+        self._shifts = []
+        self._widths = []
         makedirs(outputfolder)
         gStyle.SetOptStat(000000000)
 
@@ -64,13 +67,6 @@ class plots(object):
 
         dirname = 'Final0'
 
-        # Need to make histograms persistens
-        histos = []
-
-        # Also store fit results
-        shifts = []  # offset
-        widths = []  # noise
-
         count = 0
 
         # Loop over all keys in subdirectory
@@ -111,9 +107,9 @@ class plots(object):
 
             # Save values for future use
             # Only save them if the fit worked
-            shifts.append(histo.GetFunction('errf').GetParameter(0))
-            widths.append(histo.GetFunction('errf').GetParameter(1))
-            histos.append(histo)
+            self._shifts.append(histo.GetFunction('errf').GetParameter(0))
+            self._widths.append(histo.GetFunction('errf').GetParameter(1))
+            self._histos.append(histo)
 
             # Save histogram with fit
             histo.Draw()
@@ -127,32 +123,28 @@ class plots(object):
             count += 1
 
         # Draw all error functions in one histogram
-        self._draw_all_errf(histos, shifts, widths, cbc)
+        self._draw_all_errf(cbc)
 
         # Draw all fitted error functions in one histogram
-        self._draw_all_errf_fit(histos, shifts, widths, cbc)
+        self._draw_all_errf_fit(cbc)
 
         # Draw all fitted error functions and measurements in one histogram
-        self._draw_all_errf_fit_meas(histos, shifts, widths, cbc)
+        self._draw_all_errf_fit_meas(cbc)
 
-    def _draw_all_errf(self, histos, shifts, widths, cbc):
+    def _draw_all_errf(self, cbc):
 
         """ Draw all error functions in one histogram
         Parameters:
-            histos: List of histograms with fitted error functions
-            shifts: List of shifts used for fitting error functions
-            widths: List of widths used for fitting error functions
             cbc: CBC to plot
         """
 
         self._canvas.Clear()
 
-        for idx, histo in enumerate(histos):
+        for idx, histo in enumerate(self._histos):
 
             if idx == 0:
                 # Dynamically set plot range
-                histo.GetXaxis().SetRangeUser(self._getXmin(shifts, widths),
-                                              self._getXmax(shifts, widths))
+                histo.GetXaxis().SetRangeUser(self._getXmin(), self._getXmax())
                 histo.Draw('C HIST')
                 histo.SetTitle('S-curves for CBC {}'.format(cbc))
                 histo.GetXaxis().SetTitle('VCth units')
@@ -163,27 +155,23 @@ class plots(object):
         self._save('scurves_cbc{}'.format(cbc))
         self._save('scurves_cbc{}_log'.format(cbc), True)
 
-    def _draw_all_errf_fit(self, histos, shifts, widths, cbc):
+    def _draw_all_errf_fit(self, cbc):
 
         """ Draw all error functions in one histogram
         Parameters:
-            histos: List of histograms with fitted error functions
-            shifts: List of shifts used for fitting error functions
-            widths: List of widths used for fitting error functions
             cbc: CBC to plot
         """
 
         self._canvas.Clear()
 
-        for idx, histo in enumerate(histos):
+        for idx, histo in enumerate(self._histos):
 
             # Get fitted function
             func = histo.GetFunction('errf')
 
             if idx == 0:
                 # Dynamically set plot range
-                func.SetRange(self._getXmin(shifts, widths),
-                              self._getXmax(shifts, widths))
+                func.SetRange(self._getXmin(), self._getXmax())
                 func.Draw()
                 func.SetTitle('Fitted S-curves for CBC {}'.format(cbc))
                 func.GetXaxis().SetTitle('VCth units')
@@ -194,24 +182,20 @@ class plots(object):
         self._save('scurves_cbc{}_fit'.format(cbc))
         self._save('scurves_cbc{}_fit_log'.format(cbc), True)
 
-    def _draw_all_errf_fit_meas(self, histos, shifts, widths, cbc):
+    def _draw_all_errf_fit_meas(self, cbc):
 
         """ Draw all error functions in one histogram
         Parameters:
-            histos: List of histograms with fitted error functions
-            shifts: List of shifts used for fitting error functions
-            widths: List of widths used for fitting error functions
             cbc: CBC to plot
         """
 
         self._canvas.Clear()
 
-        for idx, histo in enumerate(histos):
+        for idx, histo in enumerate(self._histos):
 
             if idx == 0:
                 # Dynamically set plot range
-                histo.GetXaxis().SetRangeUser(self._getXmin(shifts, widths),
-                                              self._getXmax(shifts, widths))
+                histo.GetXaxis().SetRangeUser(self._getXmin(), self._getXmax())
                 histo.Draw('P')
                 histo.SetTitle('Fitted S-curves for CBC {}'.format(cbc))
                 histo.GetXaxis().SetTitle('VCth units')
@@ -303,25 +287,21 @@ class plots(object):
         if self._directory:
             chdir(cwd)
 
-    def _getXmin(self, shifts, widths):
+    def _getXmin(self):
 
         """ Get minimum on X-Axis to plot.
-        Parameters:
-            shifts: List of shifts from error functions
-            widths: List of widths from error functions
         """
 
-        return min([shift-5*width for shift, width in zip(shifts, widths)])
+        return min([shift-5*width for shift, width in
+                    zip(self._shifts, self._widths)])
 
-    def _getXmax(self, shifts, widths):
+    def _getXmax(self):
 
         """ Get maximum on X-Axis to plot.
-        Parameters:
-            shifts: List of shifts from error functions
-            widths: List of widths from error functions
         """
 
-        return max([shift+5*width for shift, width in zip(shifts, widths)])
+        return max([shift+5*width for shift, width in
+                    zip(self._shifts, self._widths)])
 
     def _getColor(self, idx, nice=False):
 
